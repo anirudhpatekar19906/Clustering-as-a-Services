@@ -1,0 +1,44 @@
+# Clustering-as-a-Service — local development infrastructure.
+# API, worker, and frontend services will be added after their code exists.
+# These defaults are for a single developer machine, NOT public deployment.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: caas
+      POSTGRES_USER: caas
+      # Local development only. Override via CAAS_POSTGRES_PASSWORD and
+      # update CAAS_DATABASE_URL to match if you change this password.
+      POSTGRES_PASSWORD: ${CAAS_POSTGRES_PASSWORD:-caas}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    stop_grace_period: 30s
+
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  postgres_data:
+  redis_data:

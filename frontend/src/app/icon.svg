@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="CaaS logo">
+  <title>CaaS</title>
+  <rect width="64" height="64" rx="17" fill="#172235"/>
+  <rect x="16" y="15" width="13" height="13" rx="3" fill="#FFFFFF"/>
+  <rect x="36" y="23" width="13" height="13" rx="3" fill="#91A9FF"/>
+  <rect x="26" y="39" width="13" height="13" rx="3" fill="#65D8BD"/>
+</svg>

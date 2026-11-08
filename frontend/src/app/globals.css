@@ -1,0 +1,331 @@
+@import "tailwindcss";
+
+/*
+ * CaaS design system — File 46
+ *
+ * Single source of truth for the application's visual foundations.
+ * Keep application-wide tokens here; use Tailwind utilities for page layouts.
+ * The workspace intentionally uses a light canvas and dark navigation.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Brand and surfaces */
+  --caas-canvas: #f7f8fa;
+  --caas-surface: #ffffff;
+  --caas-surface-muted: #f4f6fa;
+  --caas-sidebar: #192437;
+  --caas-border: #e3e8ef;
+  --caas-border-strong: #cdd6e2;
+
+  /* Typography */
+  --caas-ink: #172235;
+  --caas-text: #34445b;
+  --caas-muted: #64748b;
+  --caas-subtle: #6d7b90;
+
+  /* Actions and semantic feedback */
+  --caas-primary: #305be8;
+  --caas-primary-hover: #254dd0;
+  --caas-focus: #3667ed;
+  --caas-success: #137b67;
+  --caas-success-bg: #e8f6f1;
+  --caas-warning: #926313;
+  --caas-warning-bg: #fff5de;
+  --caas-error: #b43745;
+  --caas-error-bg: #fff0f1;
+  --caas-info: #3455ae;
+  --caas-info-bg: #edf2ff;
+
+  /* Shape and depth */
+  --caas-radius-sm: 6px;
+  --caas-radius-md: 10px;
+  --caas-radius-lg: 14px;
+  --caas-shadow-card: 0 2px 12px rgb(23 34 53 / 4%);
+  --caas-shadow-lifted: 0 16px 46px rgb(23 34 53 / 10%);
+}
+
+/* Make the same tokens available to Tailwind v4 utility classes. */
+@theme inline {
+  --color-background: var(--caas-canvas);
+  --color-foreground: var(--caas-ink);
+  --color-caas-canvas: var(--caas-canvas);
+  --color-caas-surface: var(--caas-surface);
+  --color-caas-ink: var(--caas-ink);
+  --color-caas-muted: var(--caas-muted);
+  --color-caas-primary: var(--caas-primary);
+  --color-caas-border: var(--caas-border);
+  --font-sans: var(--font-geist-sans), "Segoe UI", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 24px;
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--caas-canvas);
+    color: var(--caas-ink);
+    font-family: var(--font-geist-sans), "Segoe UI", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: #dbe5ff;
+    color: var(--caas-ink);
+  }
+
+  /* Visible keyboard focus across links, forms, and custom actions. */
+  :is(a, button, input, textarea, select, summary, [role="button"]):focus-visible {
+    outline: 3px solid var(--caas-focus);
+    outline-offset: 3px;
+  }
+
+  :is(button, input, textarea, select) {
+    font: inherit;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+/* Reusable primitives for the authenticated workspace in later files. */
+@layer components {
+  .caas-page {
+    width: min(100% - 40px, 1240px);
+    margin-inline: auto;
+  }
+
+  .caas-card {
+    border: 1px solid var(--caas-border);
+    border-radius: var(--caas-radius-lg);
+    background: var(--caas-surface);
+    box-shadow: var(--caas-shadow-card);
+  }
+
+  .caas-card-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--caas-border);
+  }
+
+  .caas-eyebrow {
+    color: var(--caas-info);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .caas-heading {
+    color: var(--caas-ink);
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 650;
+    letter-spacing: -0.045em;
+    line-height: 1.25;
+  }
+
+  .caas-description {
+    color: var(--caas-muted);
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+
+  .caas-label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--caas-text);
+    font-size: 0.8125rem;
+    font-weight: 600;
+  }
+
+  .caas-input {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 13px;
+    border: 1px solid var(--caas-border-strong);
+    border-radius: var(--caas-radius-md);
+    background: var(--caas-surface);
+    color: var(--caas-ink);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .caas-input::placeholder {
+    color: var(--caas-subtle);
+  }
+
+  .caas-input:hover:not(:disabled) {
+    border-color: #9eafc7;
+  }
+
+  .caas-input:focus-visible {
+    border-color: var(--caas-primary);
+    box-shadow: 0 0 0 3px rgb(48 91 232 / 12%);
+  }
+
+  .caas-input[aria-invalid="true"] {
+    border-color: var(--caas-error);
+  }
+
+  .caas-input:disabled {
+    background: var(--caas-surface-muted);
+    color: var(--caas-muted);
+  }
+
+  .caas-field-error {
+    margin-top: 6px;
+    color: var(--caas-error);
+    font-size: 0.8125rem;
+  }
+
+  .caas-button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: var(--caas-radius-md);
+    font-size: 0.8125rem;
+    font-weight: 650;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 160ms ease, border-color 160ms ease,
+      box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  .caas-button:hover:not(:disabled):not([aria-disabled="true"]) {
+    transform: translateY(-1px);
+  }
+
+  .caas-button:disabled,
+  .caas-button[aria-disabled="true"] {
+    opacity: 0.55;
+  }
+
+  .caas-button-primary {
+    background: var(--caas-primary);
+    color: white;
+  }
+
+  .caas-button-primary:hover:not(:disabled) {
+    background: var(--caas-primary-hover);
+    box-shadow: 0 6px 14px rgb(48 91 232 / 15%);
+  }
+
+  .caas-button-secondary {
+    border-color: var(--caas-border-strong);
+    background: var(--caas-surface);
+    color: var(--caas-ink);
+  }
+
+  .caas-button-secondary:hover:not(:disabled) {
+    background: var(--caas-surface-muted);
+  }
+
+  .caas-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    border-radius: var(--caas-radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  .caas-status-success {
+    background: var(--caas-success-bg);
+    color: var(--caas-success);
+  }
+
+  .caas-status-warning {
+    background: var(--caas-warning-bg);
+    color: var(--caas-warning);
+  }
+
+  .caas-status-error {
+    background: var(--caas-error-bg);
+    color: var(--caas-error);
+  }
+
+  .caas-status-info {
+    background: var(--caas-info-bg);
+    color: var(--caas-info);
+  }
+
+  .caas-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .caas-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--caas-text);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    text-align: left;
+  }
+
+  .caas-table th {
+    padding: 12px 16px;
+    background: var(--caas-surface-muted);
+    color: var(--caas-muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .caas-table td {
+    padding: 13px 16px;
+  }
+
+  .caas-table th,
+  .caas-table td {
+    border-bottom: 1px solid var(--caas-border);
+  }
+
+  .caas-table tbody tr:hover {
+    background: #f8faff;
+  }
+}
+
+@media (max-width: 640px) {
+  .caas-page {
+    width: min(100% - 32px, 1240px);
+  }
+
+  .caas-card-header {
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

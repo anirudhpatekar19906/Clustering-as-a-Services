@@ -1,0 +1,41 @@
+
+# Clustering-as-a-Service — Python backend dependencies
+# Recommended development and Docker Python version: 3.12
+# Frontend dependencies will be managed separately using package.json.
+
+# Data processing and machine learning
+# Keep our custom K-Means implementation; scikit-learn supports optional algorithms.
+numpy>=2.2,<3.0
+pandas>=2.2,<3.0
+scikit-learn>=1.6,<2.0
+matplotlib>=3.9,<4.0
+seaborn>=0.13.2,<0.15.0
+
+# REST API and configuration
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.34,<1.0
+pydantic>=2.10,<3.0
+pydantic-settings>=2.7,<3.0
+python-multipart>=0.0.20,<1.0
+
+# PostgreSQL persistence and database migrations
+SQLAlchemy>=2.0.36,<3.0
+alembic>=1.14,<2.0
+psycopg[binary]>=3.2,<4.0
+
+# Shared caching and asynchronous clustering jobs
+redis>=6.0,<8.0
+rq>=2.2,<3.0
+
+# Authentication and password hashing
+PyJWT>=2.10,<3.0
+pwdlib[argon2]>=0.2,<1.0
+
+# Monitoring
+prometheus-client>=0.21,<1.0
+
+# Backend testing and code quality
+httpx>=0.28,<1.0
+pytest>=8.3,<10.0
+pytest-cov>=6.0,<8.0
+ruff>=0.9,<1.0
