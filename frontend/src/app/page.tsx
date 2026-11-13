@@ -1,650 +1,374 @@
-"use client";
+import type { Metadata } from "next";
+import Link from "next/link";
 
-import { useState } from "react";
+/**
+ * CaaS marketing homepage.
+ * Replace: frontend/src/app/page.tsx
+ * No backend changes, new dependencies, or image hosting required.
+ * All illustration data is intentionally decorative (not real experiment data).
+ */
 
-const clusters = [
-  {
-    id: "a",
-    label: "Segment 01",
-    color: "#4367D8",
-    description: "Lower-frequency customers",
-    points: [
-      [102, 235], [121, 214], [139, 247], [151, 221],
-      [162, 259], [177, 230], [193, 207], [207, 250],
-      [223, 226], [238, 246], [186, 272], [147, 276],
-    ],
-  },
-  {
-    id: "b",
-    label: "Segment 02",
-    color: "#159A86",
-    description: "Consistent, engaged customers",
-    points: [
-      [280, 158], [297, 177], [315, 143], [328, 163],
-      [344, 132], [360, 170], [376, 142], [391, 182],
-      [407, 151], [425, 171], [353, 196], [383, 115],
-    ],
-  },
-  {
-    id: "c",
-    label: "Segment 03",
-    color: "#D69B48",
-    description: "High-value regular customers",
-    points: [
-      [430, 95], [447, 119], [462, 83], [475, 109],
-      [488, 68], [505, 98], [518, 73], [533, 116],
-      [547, 89], [558, 62], [482, 137], [522, 133],
-    ],
-  },
-] as const;
+export const metadata: Metadata = {
+  title: "CaaS | Discover the patterns in your data",
+  description:
+    "CaaS gives your data a clearer direction. Upload CSV files, explore K-Means clustering, and turn hidden patterns into understandable results.",
+};
 
-type ClusterFilter = "all" | (typeof clusters)[number]["id"];
-
-const steps = [
+const benefits = [
   {
     number: "01",
-    title: "Bring your dataset",
+    title: "Focus on what matters",
     description:
-      "Upload a CSV, inspect its columns, and understand the data before you run anything.",
+      "Move from rows and columns to meaningful groups, with a workspace built around understanding your data.",
+    color: "#315FE6",
+    icon: "focus",
   },
   {
     number: "02",
-    title: "Choose the experiment",
+    title: "Explore with confidence",
     description:
-      "Select your features and clustering settings, then submit a reproducible run.",
+      "Choose how your data is prepared and clustered, with a transparent, repeatable approach behind every run.",
+    color: "#0B978F",
+    icon: "layers",
   },
   {
     number: "03",
-    title: "Explore the structure",
+    title: "Keep the bigger picture",
     description:
-      "Review cluster sizes, centroids, metrics, and individual assignments in one place.",
+      "See the story behind your clusters, revisit your experiments, and take your findings with you.",
+    color: "#7A62D8",
+    icon: "insights",
   },
+] as const;
+
+const journey = [
+  {
+    number: "01",
+    title: "Bring your data",
+    description: "Start with a CSV and choose the information you want to explore.",
+  },
+  {
+    number: "02",
+    title: "Discover its structure",
+    description: "Run a configurable K-Means clustering experiment.",
+  },
+  {
+    number: "03",
+    title: "Understand what you found",
+    description: "Explore the visual results, compare groups, and save your work.",
+  },
+] as const;
+
+const leftDots: [number, number, number][] = [
+  [78, 280, 4], [91, 315, 5], [111, 292, 4], [123, 339, 5], [139, 271, 6],
+  [147, 309, 4], [163, 327, 5], [169, 287, 4], [182, 356, 5], [193, 316, 6],
+  [202, 273, 4], [217, 341, 5], [225, 299, 4], [244, 324, 5], [157, 366, 4],
+  [103, 361, 4], [66, 342, 4], [209, 375, 3], [128, 384, 3], [250, 362, 4],
+];
+const centerDots: [number, number, number][] = [
+  [242, 149, 4], [266, 174, 5], [285, 125, 5], [295, 187, 4], [312, 152, 6],
+  [328, 216, 4], [335, 128, 5], [350, 177, 5], [371, 149, 4], [389, 197, 5],
+  [407, 165, 4], [281, 232, 3], [310, 249, 4], [362, 236, 4], [394, 121, 3],
+  [352, 95, 4], [253, 217, 4], [431, 196, 4], [375, 268, 3], [293, 86, 3],
+];
+const rightDots: [number, number, number][] = [
+  [389, 318, 4], [411, 292, 5], [432, 339, 5], [444, 285, 4], [461, 313, 6],
+  [476, 360, 4], [486, 280, 5], [500, 333, 4], [520, 305, 5], [528, 365, 4],
+  [546, 340, 4], [405, 372, 4], [454, 388, 3], [502, 396, 3], [567, 317, 3],
+  [425, 409, 3], [547, 395, 4], [474, 243, 3], [558, 277, 3], [382, 389, 3],
 ];
 
-export default function Home() {
-  const [selected, setSelected] = useState<ClusterFilter>("all");
-  const currentCluster = clusters.find(
-    (cluster) => cluster.id === selected
+function ArrowIcon({ diagonal = false }: { diagonal?: boolean }) {
+  return diagonal ? (
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 19 19 5M8 5h11v11" />
+    </svg>
+  ) : (
+    <svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 12h16m-7-7 7 7-7 7" />
+    </svg>
   );
+}
 
+function BrandMark({ inverted = false }: { inverted?: boolean }) {
   return (
-    <div className="min-h-screen bg-[#F7F8FA] font-sans text-[#172235] antialiased">
-      {/* Navigation */}
-      <div className="border-b border-[#E7EAF0] bg-white/95">
-        <header className="mx-auto flex h-[76px] max-w-[1240px] items-center justify-between px-5 sm:px-8">
-          <a
-            href="#top"
-            className="flex items-center gap-3"
-            aria-label="CaaS home"
-          >
-            <span className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-[#172235]">
-              <span className="relative block h-4 w-4">
-                <span className="absolute left-0 top-0 h-[6px] w-[6px] rounded-[2px] bg-white" />
-                <span className="absolute right-0 top-[3px] h-[6px] w-[6px] rounded-[2px] bg-[#8CA4FF]" />
-                <span className="absolute bottom-0 left-[4px] h-[6px] w-[6px] rounded-[2px] bg-[#65D8BD]" />
-              </span>
-            </span>
+    <span className={`inline-flex items-center gap-2.5 ${inverted ? "text-white" : "text-[#18263e]"}`}>
+      <span className={`relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] ${inverted ? "bg-white/12 ring-1 ring-white/20" : "bg-[#19263E]"}`} aria-hidden="true">
+        <span className="relative block h-[19px] w-[19px]">
+          <span className="absolute left-0 top-0 h-[7px] w-[7px] rounded-[2px] bg-white" />
+          <span className="absolute right-0 top-[5px] h-[7px] w-[7px] rounded-[2px] bg-[#9BAEFF]" />
+          <span className="absolute bottom-0 left-[5px] h-[7px] w-[7px] rounded-[2px] bg-[#6BDEC4]" />
+        </span>
+      </span>
+      <span className="text-[23px] font-bold tracking-[-0.075em]">caas<span className={inverted ? "text-[#8FA8FF]" : "text-[#315FE6]"}>.</span></span>
+    </span>
+  );
+}
 
-            <span className="text-[19px] font-semibold tracking-[-0.04em]">
-              caas<span className="text-[#5263A3]">.</span>
-            </span>
+function BenefitIcon({ name, color }: { name: "focus" | "layers" | "insights"; color: string }) {
+  const common = {
+    width: 25,
+    height: 25,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: color,
+    strokeWidth: 1.7,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true as const,
+  };
 
-            <span className="ml-1 hidden border-l border-[#DBDFE7] pl-4 text-[12px] font-medium tracking-[0.01em] text-[#7B8495] sm:block">
-              Clustering workspace
-            </span>
-          </a>
+  if (name === "focus") {
+    return <svg {...common}><path d="M7 3H5a2 2 0 0 0-2 2v2m14-4h2a2 2 0 0 1 2 2v2M3 17v2a2 2 0 0 0 2 2h2m14-4v2a2 2 0 0 1-2 2h-2" /><circle cx="12" cy="12" r="4" /><circle cx="12" cy="12" r="1" fill={color} stroke="none" /></svg>;
+  }
+  if (name === "layers") {
+    return <svg {...common}><path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5" /></svg>;
+  }
+  return <svg {...common}><path d="M4 19V5m0 14h16M8 14l4-4 3 3 5-7" /><path d="M16.5 6H20v3.5" /></svg>;
+}
 
-          <nav
-            className="hidden items-center gap-8 text-[13px] font-medium text-[#6B7585] md:flex"
-            aria-label="Main navigation"
-          >
-            <a
-              href="#workspace"
-              className="transition-colors hover:text-[#172235]"
-            >
-              Product
-            </a>
-            <a
-              href="#workflow"
-              className="transition-colors hover:text-[#172235]"
-            >
-              How it works
-            </a>
+function ClusterArtwork() {
+  return (
+    <div className="relative mx-auto aspect-[1.08] w-full max-w-[620px] overflow-visible" role="img" aria-label="Abstract illustration showing scattered data points forming three colorful groups">
+      <div className="absolute inset-[9%_6%_9%_7%] rounded-full bg-[radial-gradient(ellipse_at_48%_45%,#ffffff_0%,#ecf4ff_41%,#e8eeff_66%,transparent_76%)] blur-[5px]" />
+      <div className="absolute inset-[9%_8%_10%_8%] rounded-full border border-[#D9E7FA]/70" />
+      <div className="absolute inset-[21%_20%_21%_20%] rounded-full border border-dashed border-[#C9D7ED]" />
+      <svg viewBox="0 0 630 520" className="relative h-full w-full overflow-visible" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#E4EDFF" stopOpacity="0.95" />
+            <stop offset="100%" stopColor="#E4EDFF" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="connection" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#315FE6" stopOpacity="0.25" />
+            <stop offset="0.5" stopColor="#0BAA9B" stopOpacity="0.15" />
+            <stop offset="1" stopColor="#8772E8" stopOpacity="0.2" />
+          </linearGradient>
+          <filter id="softShadow"><feDropShadow dx="0" dy="9" stdDeviation="13" floodColor="#203F73" floodOpacity="0.13" /></filter>
+        </defs>
+        <circle cx="313" cy="250" r="225" fill="url(#halo)" />
+        <g stroke="url(#connection)" strokeWidth="1.4" strokeDasharray="5 7" fill="none">
+          <path d="M155 318 C208 250 240 211 317 172" />
+          <path d="M317 172 C379 212 431 265 472 333" />
+          <path d="M155 318 C260 388 366 400 472 333" />
+        </g>
+        <g opacity="0.55" stroke="#C9D7EA" strokeWidth="1" fill="none">
+          <circle cx="315" cy="252" r="118" strokeDasharray="2 9" />
+          <circle cx="315" cy="252" r="181" strokeDasharray="3 10" />
+          <path d="M315 45V65M315 446v20M86 253h20M523 253h20" />
+        </g>
+        <circle cx="161" cy="317" r="113" fill="#E4ECFF" fillOpacity="0.50" stroke="#C8D8FF" strokeOpacity="0.8" />
+        <circle cx="332" cy="168" r="113" fill="#DFFAF5" fillOpacity="0.43" stroke="#B9EDE5" strokeOpacity="0.83" />
+        <circle cx="473" cy="333" r="107" fill="#F0ECFF" fillOpacity="0.5" stroke="#DED6FF" strokeOpacity="0.84" />
+        <g fill="#416CE8">
+          {leftDots.map(([cx, cy, r], i) => <circle key={`left-${i}`} cx={cx} cy={cy} r={r} opacity={i % 4 === 0 ? 0.52 : 0.86} />)}
+        </g>
+        <g fill="#18A89D">
+          {centerDots.map(([cx, cy, r], i) => <circle key={`center-${i}`} cx={cx} cy={cy} r={r} opacity={i % 4 === 0 ? 0.52 : 0.87} />)}
+        </g>
+        <g fill="#927BE7">
+          {rightDots.map(([cx, cy, r], i) => <circle key={`right-${i}`} cx={cx} cy={cy} r={r} opacity={i % 4 === 0 ? 0.56 : 0.86} />)}
+        </g>
+        <g filter="url(#softShadow)">
+          <g transform="translate(92 181)">
+            <rect width="93" height="37" rx="18.5" fill="white" stroke="#E1E9F4" />
+            <circle cx="19" cy="18.5" r="5" fill="#416CE8" />
+            <text x="32" y="23" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="600" fill="#3A4A64">Group A</text>
+          </g>
+          <g transform="translate(386 73)">
+            <rect width="93" height="37" rx="18.5" fill="white" stroke="#E1E9F4" />
+            <circle cx="19" cy="18.5" r="5" fill="#18A89D" />
+            <text x="32" y="23" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="600" fill="#3A4A64">Group B</text>
+          </g>
+          <g transform="translate(443 425)">
+            <rect width="93" height="37" rx="18.5" fill="white" stroke="#E1E9F4" />
+            <circle cx="19" cy="18.5" r="5" fill="#927BE7" />
+            <text x="32" y="23" fontFamily="Arial, sans-serif" fontSize="12" fontWeight="600" fill="#3A4A64">Group C</text>
+          </g>
+        </g>
+        <g fill="white" stroke="#CBD9F0" strokeWidth="2">
+          <circle cx="315" cy="252" r="8" />
+        </g>
+        <circle cx="315" cy="252" r="3" fill="#526BE3" />
+      </svg>
+      <span className="absolute bottom-[7%] left-[5%] hidden items-center gap-2 rounded-full border border-[#DDE7F6] bg-white/95 px-4 py-2 text-[11px] font-medium text-[#687A98] shadow-[0_10px_30px_rgba(47,76,122,0.08)] sm:inline-flex">
+        <span className="inline-block h-2 w-2 rounded-full bg-[#40B8A9]" />
+        Different points. Clearer patterns.
+      </span>
+    </div>
+  );
+}
+
+function JourneyArtwork() {
+  return (
+    <div className="relative flex min-h-[340px] items-center justify-center overflow-hidden rounded-[26px] bg-[#16263F] px-5 py-10 sm:min-h-[420px]" aria-hidden="true">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_73%_21%,rgba(75,112,235,0.38),transparent_50%),radial-gradient(ellipse_at_14%_88%,rgba(39,171,161,0.18),transparent_43%)]" />
+      <div className="absolute inset-0 opacity-[0.16]" style={{ backgroundImage: "linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)", backgroundSize: "46px 46px" }} />
+      <svg viewBox="0 0 520 350" className="relative w-full max-w-[520px]" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="flow" x1="0" x2="1"><stop stopColor="#75A1FF" /><stop offset="1" stopColor="#63E1C8" /></linearGradient>
+        </defs>
+        <g stroke="#7990B6" strokeOpacity=".23" fill="none">
+          <rect x="20" y="60" width="126" height="222" rx="16" />
+          <rect x="190" y="60" width="130" height="222" rx="16" />
+          <rect x="364" y="60" width="136" height="222" rx="16" />
+        </g>
+        <g stroke="url(#flow)" strokeWidth="2" fill="none" strokeLinecap="round">
+          <path d="M148 173h38m-9-9 9 9-9 9" />
+          <path d="M324 173h36m-9-9 9 9-9 9" />
+        </g>
+        <g stroke="#B5C7E3" strokeWidth="2" fill="none" strokeLinecap="round">
+          <rect x="50" y="98" width="66" height="82" rx="7" />
+          <path d="M64 117h36M64 131h36M64 145h36M64 159h22" />
+        </g>
+        <g fill="#97ADDE"><circle cx="65" cy="118" r="3" /><circle cx="65" cy="132" r="3" /><circle cx="65" cy="146" r="3" /></g>
+        <g fill="#B0C7FF">
+          {[ [216,114],[241,138],[271,101],[291,148],[217,181],[247,171],[287,195],[227,214],[274,226],[298,119] ].map(([x,y],i)=><circle key={`mid-${i}`} cx={x} cy={y} r="5" opacity={i%2 ? .65 : 1} />)}
+        </g>
+        <g fill="#78DCCB">
+          {[ [401,112],[417,125],[394,137],[429,103],[417,153],[448,141] ].map(([x,y],i)=><circle key={`out-a-${i}`} cx={x} cy={y} r="5" opacity={i%2 ? .6 : 1} />)}
+        </g>
+        <g fill="#93ACFF">
+          {[ [440,180],[461,195],[423,200],[447,219],[475,221],[464,174] ].map(([x,y],i)=><circle key={`out-b-${i}`} cx={x} cy={y} r="5" opacity={i%2 ? .6 : 1} />)}
+        </g>
+        <g fill="#D6C3FF">
+          {[ [393,202],[409,226],[379,229],[402,251],[427,250],[383,255] ].map(([x,y],i)=><circle key={`out-c-${i}`} cx={x} cy={y} r="5" opacity={i%2 ? .6 : 1} />)}
+        </g>
+        <g fill="#C9D7EA" fontFamily="Arial, sans-serif" textAnchor="middle" fontSize="13" fontWeight="600">
+          <text x="83" y="241">Your data</text><text x="255" y="241">Explore</text><text x="432" y="272">Patterns</text>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <div className="min-h-screen overflow-x-hidden bg-white font-sans text-[#17263E] antialiased">
+      <header className="relative z-20 border-b border-[#E7EBF1] bg-white/95">
+        <div className="mx-auto flex h-[76px] max-w-[1240px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
+          <Link href="/" className="inline-flex items-center rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#315FE6]" aria-label="CaaS homepage"><BrandMark /></Link>
+          <nav className="hidden items-center gap-8 text-[13px] font-medium text-[#596B84] md:flex" aria-label="Primary navigation">
+            <a href="#why-caas" className="transition-colors hover:text-[#315FE6]">Why CaaS</a>
+            <a href="#how-it-works" className="transition-colors hover:text-[#315FE6]">How it works</a>
           </nav>
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            <Link href="/login" className="rounded-lg px-2.5 py-2 text-[12px] font-semibold text-[#283850] transition-colors hover:text-[#315FE6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#315FE6] sm:px-4 sm:text-[13px]">Sign in</Link>
+            <Link href="/register" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#315FE6] px-3.5 text-[12px] font-semibold text-white shadow-[0_6px_14px_rgba(49,95,230,.16)] transition-all hover:bg-[#254FD0] hover:shadow-[0_9px_18px_rgba(49,95,230,.22)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#315FE6] sm:px-5 sm:text-[13px]">Get started <span className="hidden sm:inline"><ArrowIcon /></span></Link>
+          </div>
+        </div>
+      </header>
 
-          <a
-            href="#workspace"
-            className="inline-flex h-10 items-center gap-2 rounded-lg border border-[#DDE1E8] bg-white px-4 text-[12px] font-semibold text-[#253149] shadow-[0_1px_2px_rgba(21,34,54,0.03)] transition-colors hover:bg-[#F7F8FA] sm:text-[13px]"
-          >
-            View workspace <span aria-hidden="true">↗</span>
-          </a>
-        </header>
-      </div>
-
-      <main id="top">
-        {/* Hero */}
-        <section className="relative overflow-hidden border-b border-[#E8EBF0]">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-[0.35]"
-            style={{
-              backgroundImage:
-                "linear-gradient(#DCE2ED 1px, transparent 1px), linear-gradient(90deg, #DCE2ED 1px, transparent 1px)",
-              backgroundSize: "64px 64px",
-              maskImage:
-                "linear-gradient(to bottom, transparent, black 60%, transparent)",
-            }}
-          />
-
-          <div className="relative mx-auto max-w-[1240px] px-5 pb-14 pt-20 sm:px-8 sm:pb-20 sm:pt-24 lg:pt-28">
-            <div className="mx-auto max-w-[780px] text-center">
-              <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[#DCE3F5] bg-white px-3 py-[7px] text-[11px] font-semibold tracking-[0.08em] text-[#455D9E] uppercase shadow-[0_2px_10px_rgba(27,47,86,0.03)]">
-                <span className="h-[6px] w-[6px] rounded-full bg-[#476BE0]" />
-                A clearer way to explore your data
-              </div>
-
-              <h1 className="text-[43px] leading-[1.1] font-semibold tracking-[-0.065em] text-[#152238] sm:text-[62px] lg:text-[72px]">
-                Find structure in your data.
-                <span className="block text-[#6E7D98]">
-                  Understand every cluster.
-                </span>
+      <main>
+        {/* Outcome-led hero: the visual is brand artwork, not a fake product dashboard. */}
+        <section className="relative isolate overflow-hidden bg-[linear-gradient(113deg,#FFFFFF_1%,#F8FBFF_53%,#EFF5FF_100%)]">
+          <div className="pointer-events-none absolute -right-[16%] top-[-180px] h-[480px] w-[620px] rounded-full bg-[#E7EEFF]/50 blur-[110px]" />
+          <div className="mx-auto grid max-w-[1240px] items-center gap-8 px-5 py-16 sm:px-8 sm:py-20 md:gap-3 lg:min-h-[660px] lg:grid-cols-[0.98fr_1.02fr] lg:px-10 lg:py-16">
+            <div className="relative z-10 max-w-[600px]">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#DCE6FA] bg-white px-3.5 py-2 text-[10px] font-bold uppercase tracking-[0.13em] text-[#4565AC] shadow-[0_2px_12px_rgba(56,88,140,.035)] sm:text-[11px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#315FE6]" />
+                A smarter perspective on data
+              </span>
+              <h1 className="mt-7 max-w-[650px] text-[clamp(44px,5.1vw,72px)] font-semibold leading-[1.07] tracking-[-0.065em] text-[#16243D]">
+                Make sense of <span className="text-[#315FE6]">your data.</span>
               </h1>
-
-              <p className="mx-auto mt-6 max-w-[590px] text-[15px] leading-7 text-[#647188] sm:text-[17px]">
-                From raw CSVs to meaningful segments. Configure
-                K-Means, track your experiments, and explore results
-                without losing sight of the details.
+              <p className="mt-7 max-w-[500px] text-[16px] leading-[1.85] text-[#60718A] sm:text-[17px]">
+                Great insights start with seeing things differently. Discover meaningful groups, explore hidden patterns, and understand what your data is telling you—all in one clear workspace.
               </p>
-
-              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                <a
-                  href="#workspace"
-                  className="inline-flex h-12 items-center gap-3 rounded-[10px] bg-[#305BE8] px-6 text-[13px] font-semibold text-white shadow-[0_6px_16px_rgba(48,91,232,0.18)] transition-all hover:-translate-y-[1px] hover:bg-[#244CD6]"
-                >
-                  Explore the workspace
-                  <span aria-hidden="true">↗</span>
-                </a>
-
-                <a
-                  href="#workflow"
-                  className="inline-flex h-12 items-center rounded-[10px] border border-[#DCE1E8] bg-white px-6 text-[13px] font-semibold text-[#2D3950] transition-colors hover:bg-[#F0F3F8]"
-                >
-                  See how it works
-                </a>
+              <div className="mt-9 flex flex-wrap items-center gap-3">
+                <Link href="/register" className="inline-flex min-h-[51px] items-center justify-center gap-2.5 rounded-[10px] bg-[#315FE6] px-6 text-[13px] font-semibold text-white shadow-[0_12px_23px_rgba(49,95,230,.18)] transition-all hover:-translate-y-0.5 hover:bg-[#254FD0] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#315FE6]">Get started <ArrowIcon /></Link>
+                <a href="#how-it-works" className="inline-flex min-h-[51px] items-center justify-center gap-2 rounded-[10px] border border-[#D7E0ED] bg-white px-6 text-[13px] font-semibold text-[#233653] transition-colors hover:border-[#8CA4F3] hover:text-[#315FE6] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#315FE6]">See how it works</a>
               </div>
+              <p className="mt-6 text-[12px] text-[#8A99AC]">Already have an account? <Link href="/login" className="font-semibold text-[#315FE6] underline-offset-4 hover:underline">Sign in to CaaS</Link></p>
+            </div>
+            <div className="relative -mx-3 mt-2 sm:mx-auto sm:w-full lg:mt-0 lg:translate-x-5"><ClusterArtwork /></div>
+          </div>
+        </section>
 
-              <p className="mt-6 text-[11px] tracking-[0.01em] text-[#93A0B2]">
-                Built for transparent, repeatable clustering workflows.
-              </p>
+        <section className="border-y border-[#E8EDF5] bg-white" aria-label="CaaS product promise">
+          <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-center gap-x-7 gap-y-3 px-5 py-6 text-center text-[12px] font-medium text-[#6D7E95] sm:gap-x-10 sm:px-8 sm:text-[13px] lg:px-10">
+            <span className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[#315FE6]" />Designed for clarity</span>
+            <span className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[#0B978F]" />Built around exploration</span>
+            <span className="flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[#8771DB]" />Made for repeatable analysis</span>
+          </div>
+        </section>
+
+        <section id="why-caas" className="scroll-mt-20 bg-white px-5 py-20 sm:px-8 sm:py-24 lg:px-10 lg:py-28">
+          <div className="mx-auto max-w-[1160px]">
+            <div className="mx-auto max-w-[710px] text-center">
+              <p className="text-[11px] font-bold uppercase tracking-[0.17em] text-[#3864DD]">Why CaaS</p>
+              <h2 className="mt-4 text-[clamp(31px,3.5vw,49px)] font-semibold leading-[1.15] tracking-[-0.055em] text-[#19283F]">More understanding. Less complexity.</h2>
+              <p className="mt-5 text-[15px] leading-7 text-[#687B93]">Clustering shouldn&apos;t get in the way of curiosity. CaaS makes it easier to move from data to a clearer perspective.</p>
+            </div>
+            <div className="mt-12 grid gap-5 md:grid-cols-3">
+              {benefits.map((benefit) => (
+                <article key={benefit.number} className="group rounded-[20px] border border-[#E6EBF2] bg-[#FCFDFE] p-7 transition-all hover:-translate-y-1 hover:border-[#D6E2F6] hover:bg-white hover:shadow-[0_20px_45px_rgba(31,54,89,.07)] sm:p-8">
+                  <div className="mb-7 flex items-center justify-between">
+                    <span className="flex h-14 w-14 items-center justify-center rounded-[15px] bg-white shadow-[0_4px_16px_rgba(35,56,88,.05)] ring-1 ring-[#E7ECF3]"><BenefitIcon name={benefit.icon} color={benefit.color} /></span>
+                    <span className="font-mono text-[11px] font-semibold text-[#A7B2C2]">{benefit.number} / 03</span>
+                  </div>
+                  <h3 className="text-[20px] font-semibold tracking-[-0.04em] text-[#1B2A43]">{benefit.title}</h3>
+                  <p className="mt-3 text-[13px] leading-7 text-[#718199]">{benefit.description}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Interactive workspace preview */}
-        <section
-          id="workspace"
-          className="mx-auto max-w-[1240px] px-5 pb-20 pt-14 sm:px-8 sm:pb-24 sm:pt-20"
-        >
-          <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
+        <section id="how-it-works" className="scroll-mt-20 border-y border-[#E8EDF4] bg-[#F7F9FC] px-5 py-20 sm:px-8 sm:py-24 lg:px-10 lg:py-28">
+          <div className="mx-auto grid max-w-[1160px] items-center gap-11 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
             <div>
-              <p className="mb-2 text-[11px] font-semibold tracking-[0.15em] text-[#5370C9] uppercase">
-                The workspace
-              </p>
-
-              <h2 className="text-[26px] font-semibold tracking-[-0.045em] sm:text-[34px]">
-                A home for your experiments.
-              </h2>
-
-              <p className="mt-2 text-[13px] text-[#718096]">
-                Thoughtful controls. Clear analysis. No unnecessary noise.
-              </p>
-            </div>
-
-            <span className="rounded-md border border-[#DCE2EA] bg-white px-3 py-2 font-mono text-[10px] text-[#7E899B]">
-              INTERACTIVE INTERFACE PREVIEW
-            </span>
-          </div>
-
-          <div className="overflow-hidden rounded-[15px] border border-[#DCE1E9] bg-white shadow-[0_24px_70px_rgba(25,40,65,0.09)]">
-            {/* App preview top bar */}
-            <div className="flex h-[42px] items-center gap-2 border-b border-[#E8EBF0] bg-[#FCFCFD] px-5">
-              <span className="h-[8px] w-[8px] rounded-full bg-[#EB8080]" />
-              <span className="h-[8px] w-[8px] rounded-full bg-[#E8BD66]" />
-              <span className="h-[8px] w-[8px] rounded-full bg-[#77B99E]" />
-
-              <span className="ml-auto font-mono text-[10px] text-[#9AA4B2]">
-                app.caas / experiment-preview
-              </span>
-            </div>
-
-            <div className="flex min-h-[570px]">
-              {/* Sidebar preview */}
-              <aside
-                className="hidden w-[204px] shrink-0 flex-col bg-[#192437] px-4 py-6 text-white md:flex"
-                aria-label="Preview navigation"
-              >
-                <div className="flex items-center gap-2 px-3 text-[13px] font-semibold tracking-[-0.02em]">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-md bg-[#617FE6] text-[12px]">
-                    ◈
-                  </span>
-                  caas workspace
-                </div>
-
-                <p className="mb-4 mt-10 px-3 text-[9px] font-semibold tracking-[0.14em] text-[#75849C] uppercase">
-                  Workspace
-                </p>
-
-                {[
-                  { number: "01", title: "Overview" },
-                  { number: "02", title: "Datasets" },
-                  { number: "03", title: "Experiments" },
-                  { number: "04", title: "Results" },
-                ].map((item) => (
-                  <div
-                    key={item.number}
-                    className={`mb-1 flex h-10 items-center gap-3 rounded-[7px] px-3 text-[12px] ${
-                      item.title === "Results"
-                        ? "bg-[#31435E] font-semibold text-white"
-                        : "text-[#9DAAC0]"
-                    }`}
-                  >
-                    <span className="font-mono text-[10px] text-[#8697AF]">
-                      {item.number}
-                    </span>
-
-                    {item.title}
-
-                    {item.title === "Results" && (
-                      <span className="ml-auto text-[#AFC3FF]">
-                        •
-                      </span>
-                    )}
+              <p className="text-[11px] font-bold uppercase tracking-[0.17em] text-[#3864DD]">How it works</p>
+              <h2 className="mt-4 max-w-[520px] text-[clamp(32px,3.5vw,48px)] font-semibold leading-[1.16] tracking-[-0.055em] text-[#19283F]">From information to insight. Naturally.</h2>
+              <p className="mt-5 max-w-[480px] text-[15px] leading-7 text-[#6C7C94]">A straightforward journey that helps you spend more time understanding the patterns—and less time managing the process.</p>
+              <div className="mt-10 space-y-7">
+                {journey.map((step) => (
+                  <div key={step.number} className="flex items-start gap-5">
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[#DDE6F8] bg-white font-mono text-[13px] font-bold text-[#4167D4] shadow-[0_4px_12px_rgba(25,48,84,.035)]">{step.number}</span>
+                    <div>
+                      <h3 className="pt-0.5 text-[17px] font-semibold tracking-[-0.025em] text-[#23314A]">{step.title}</h3>
+                      <p className="mt-1.5 max-w-[400px] text-[13px] leading-6 text-[#77869B]">{step.description}</p>
+                    </div>
                   </div>
                 ))}
-
-                <div className="mt-auto rounded-lg border border-[#34435A] bg-[#212F44] p-3">
-                  <p className="text-[11px] font-medium text-[#E5EBF5]">
-                    Your analysis, organized.
-                  </p>
-
-                  <p className="mt-2 text-[10px] leading-5 text-[#91A0B6]">
-                    Every dataset and experiment in one workspace.
-                  </p>
-                </div>
-              </aside>
-
-              {/* Workspace content */}
-              <div className="min-w-0 flex-1 bg-[#FBFCFE]">
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#EAEDF2] bg-white px-5 py-4 sm:px-7">
-                  <span className="text-[11px] text-[#8994A5]">
-                    Experiments
-                    <span className="mx-2">/</span>
-                    <span className="font-medium text-[#344259]">
-                      Customer segmentation
-                    </span>
-                  </span>
-
-                  <span className="inline-flex items-center gap-2 rounded-md bg-[#EDF7F4] px-2.5 py-1.5 text-[10px] font-semibold text-[#28816C]">
-                    <span className="h-[6px] w-[6px] rounded-full bg-[#36A188]" />
-                    Example run · completed
-                  </span>
-                </div>
-
-                <div className="px-5 py-6 sm:px-7 sm:py-7">
-                  <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] font-semibold tracking-[0.12em] text-[#8A96A8] uppercase">
-                        Experiment / Sample 001
-                      </p>
-
-                      <h3 className="mt-1.5 text-[23px] font-semibold tracking-[-0.04em] text-[#1E2C41]">
-                        Customer segmentation
-                      </h3>
-
-                      <p className="mt-1 text-[11px] text-[#8591A3]">
-                        Demonstration dataset · K-Means clustering
-                      </p>
-                    </div>
-
-                    <span className="rounded-md border border-[#E0E6EF] bg-white px-3 py-2 text-[10px] font-medium text-[#69768C]">
-                      3 clusters · 2 features
-                    </span>
-                  </div>
-
-                  {/* Summary metrics */}
-                  <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
-                    {[
-                      {
-                        label: "Preview points",
-                        value: "36",
-                        extra: "Sample observations",
-                      },
-                      {
-                        label: "Segments",
-                        value: "03",
-                        extra: "Identified groups",
-                      },
-                      {
-                        label: "Input features",
-                        value: "02",
-                        extra: "Selected columns",
-                      },
-                      {
-                        label: "Run state",
-                        value: "Done",
-                        extra: "Illustrative result",
-                      },
-                    ].map((metric) => (
-                      <div
-                        key={metric.label}
-                        className="rounded-lg border border-[#E5E9EF] bg-white px-4 py-3"
-                      >
-                        <p className="text-[10px] font-medium text-[#8B97A7]">
-                          {metric.label}
-                        </p>
-
-                        <p className="mt-1 text-[23px] leading-tight font-semibold tracking-[-0.045em] text-[#253248]">
-                          {metric.value}
-                        </p>
-
-                        <p className="mt-1.5 text-[9px] text-[#A0AAB9]">
-                          {metric.extra}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_215px]">
-                    {/* Scatter plot */}
-                    <div className="min-w-0 rounded-lg border border-[#E5E9EF] bg-white p-4 sm:p-5">
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div>
-                          <h4 className="text-[13px] font-semibold text-[#29374B]">
-                            Cluster distribution
-                          </h4>
-
-                          <p className="mt-1 text-[10px] text-[#94A0B1]">
-                            Illustrative scatter plot · 36 preview points
-                          </p>
-                        </div>
-
-                        <span className="rounded border border-[#E5E9F0] px-2 py-1 font-mono text-[9px] text-[#8996A7]">
-                          2D VIEW
-                        </span>
-                      </div>
-
-                      <div className="mt-4 overflow-hidden rounded-md border border-[#EFF1F5] bg-[#FCFDFE]">
-                        <svg
-                          viewBox="0 0 640 310"
-                          role="img"
-                          aria-label="Interactive sample scatter plot of three customer clusters"
-                          className="h-auto w-full"
-                        >
-                          {[50, 105, 160, 215, 270].map((y) => (
-                            <line
-                              key={`h-${y}`}
-                              x1="58"
-                              x2="610"
-                              y1={y}
-                              y2={y}
-                              stroke="#E7EBF2"
-                              strokeDasharray="3 6"
-                            />
-                          ))}
-
-                          {[90, 190, 290, 390, 490, 590].map((x) => (
-                            <line
-                              key={`v-${x}`}
-                              x1={x}
-                              x2={x}
-                              y1="35"
-                              y2="275"
-                              stroke="#E7EBF2"
-                              strokeDasharray="3 6"
-                            />
-                          ))}
-
-                          <line
-                            x1="58"
-                            x2="610"
-                            y1="275"
-                            y2="275"
-                            stroke="#CBD3DF"
-                          />
-
-                          <line
-                            x1="58"
-                            x2="58"
-                            y1="35"
-                            y2="275"
-                            stroke="#CBD3DF"
-                          />
-
-                          <text
-                            x="338"
-                            y="303"
-                            fill="#91A0B1"
-                            fontSize="11"
-                            textAnchor="middle"
-                          >
-                            Visit frequency →
-                          </text>
-
-                          <text
-                            x="20"
-                            y="160"
-                            fill="#91A0B1"
-                            fontSize="11"
-                            textAnchor="middle"
-                            transform="rotate(-90 20 160)"
-                          >
-                            Annual spending →
-                          </text>
-
-                          {clusters.map((cluster) =>
-                            cluster.points.map(([x, y], index) => (
-                              <circle
-                                key={`${cluster.id}-${index}`}
-                                cx={x}
-                                cy={y}
-                                r={
-                                  selected === cluster.id
-                                    ? 7
-                                    : 5.5
-                                }
-                                fill={cluster.color}
-                                fillOpacity={
-                                  selected === "all" ||
-                                  selected === cluster.id
-                                    ? 0.84
-                                    : 0.13
-                                }
-                                stroke="#FFFFFF"
-                                strokeWidth="1.5"
-                              />
-                            ))
-                          )}
-                        </svg>
-                      </div>
-
-                      {/* Interactive cluster selection */}
-                      <div
-                        className="mt-4 flex flex-wrap items-center gap-2"
-                        role="group"
-                        aria-label="Highlight cluster"
-                      >
-                        <button
-                          type="button"
-                          aria-pressed={selected === "all"}
-                          onClick={() => setSelected("all")}
-                          className={`rounded-md border px-3 py-1.5 text-[10px] font-semibold transition-colors ${
-                            selected === "all"
-                              ? "border-[#BBC8EF] bg-[#EEF2FF] text-[#3F5EBB]"
-                              : "border-[#E3E7EE] text-[#7A8698] hover:bg-[#F5F7FA]"
-                          }`}
-                        >
-                          All clusters
-                        </button>
-
-                        {clusters.map((cluster) => (
-                          <button
-                            key={cluster.id}
-                            type="button"
-                            aria-pressed={selected === cluster.id}
-                            onClick={() =>
-                              setSelected(cluster.id)
-                            }
-                            className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-[10px] font-medium transition-colors ${
-                              selected === cluster.id
-                                ? "border-[#BBC8EF] bg-[#EEF2FF] text-[#334E9D]"
-                                : "border-[#E3E7EE] text-[#7A8698] hover:bg-[#F5F7FA]"
-                            }`}
-                          >
-                            <span
-                              className="h-2 w-2 rounded-full"
-                              style={{
-                                backgroundColor: cluster.color,
-                              }}
-                            />
-
-                            {cluster.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Cluster insight panel */}
-                    <div className="rounded-lg border border-[#E5E9EF] bg-white p-4 sm:p-5">
-                      <p className="text-[10px] font-semibold tracking-[0.11em] text-[#9AA6B6] uppercase">
-                        Cluster insight
-                      </p>
-
-                      <p className="mt-2 text-[17px] font-semibold tracking-[-0.03em] text-[#233248]">
-                        {currentCluster?.label ?? "All segments"}
-                      </p>
-
-                      <p className="mt-2 min-h-12 text-[11px] leading-5 text-[#8190A3]">
-                        {currentCluster?.description ??
-                          "Select a cluster below the chart to focus on its observations."}
-                      </p>
-
-                      <div className="my-5 h-px bg-[#E9EDF3]" />
-
-                      <p className="mb-3 text-[10px] font-semibold text-[#4B5A70]">
-                        Group breakdown
-                      </p>
-
-                      <div className="space-y-3">
-                        {clusters.map((cluster) => (
-                          <div
-                            key={cluster.id}
-                            className={
-                              selected !== "all" &&
-                              selected !== cluster.id
-                                ? "opacity-35"
-                                : ""
-                            }
-                          >
-                            <div className="mb-1.5 flex justify-between text-[10px]">
-                              <span className="text-[#6D7A8E]">
-                                {cluster.label}
-                              </span>
-
-                              <span className="font-semibold text-[#33425A]">
-                                12
-                              </span>
-                            </div>
-
-                            <div className="h-[5px] overflow-hidden rounded-full bg-[#EFF2F6]">
-                              <div
-                                className="h-full w-full rounded-full"
-                                style={{
-                                  backgroundColor: cluster.color,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="mt-7 rounded-md bg-[#F4F6FA] p-3">
-                        <p className="text-[10px] font-medium text-[#526176]">
-                          Preview only
-                        </p>
-
-                        <p className="mt-1 text-[10px] leading-5 text-[#91A0B1]">
-                          These points are sample data, not results
-                          from your account.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
+              <Link href="/register" className="mt-10 inline-flex items-center gap-2 text-[13px] font-bold text-[#315FE6] hover:underline hover:underline-offset-4">Start your first exploration <ArrowIcon /></Link>
             </div>
+            <JourneyArtwork />
           </div>
-
-          <p className="mt-4 text-center text-[11px] text-[#9AA5B4]">
-            This is an interactive design preview. Real datasets
-            and live experiments will be connected in the next stages.
-          </p>
         </section>
 
-        {/* Workflow section */}
-        <section
-          id="workflow"
-          className="border-t border-[#E5E9EF] bg-white py-20 sm:py-24"
-        >
-          <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
-            <div className="max-w-[600px]">
-              <p className="mb-3 text-[11px] font-semibold tracking-[0.15em] text-[#5370C9] uppercase">
-                Simple by design
-              </p>
-
-              <h2 className="text-[29px] leading-tight font-semibold tracking-[-0.05em] text-[#172235] sm:text-[40px]">
-                From data to direction.
-              </h2>
-
-              <p className="mt-3 text-[14px] leading-7 text-[#78869A]">
-                A focused workflow that keeps your experiment
-                understandable at every step.
-              </p>
-            </div>
-
-            <div className="mt-11 grid gap-4 md:grid-cols-3">
-              {steps.map((step) => (
-                <div
-                  key={step.number}
-                  className="rounded-xl border border-[#E7EAF0] bg-[#FAFBFC] p-6 sm:p-7"
-                >
-                  <span className="font-mono text-[11px] font-semibold text-[#6378AC]">
-                    {step.number} / 03
-                  </span>
-
-                  <h3 className="mt-8 text-[17px] font-semibold tracking-[-0.03em] text-[#253248]">
-                    {step.title}
-                  </h3>
-
-                  <p className="mt-3 text-[12px] leading-6 text-[#8290A2]">
-                    {step.description}
-                  </p>
-                </div>
-              ))}
+        <section className="bg-white px-5 py-20 sm:px-8 sm:py-24 lg:px-10 lg:py-28">
+          <div className="relative mx-auto max-w-[1160px] overflow-hidden rounded-[26px] bg-[#182842] px-7 py-14 text-center text-white sm:px-12 sm:py-[72px]">
+            <div className="pointer-events-none absolute -right-16 -top-28 h-80 w-80 rounded-full border border-white/10 bg-[radial-gradient(circle,rgba(67,108,234,.28),transparent_70%)]" />
+            <div className="pointer-events-none absolute -bottom-40 -left-16 h-80 w-80 rounded-full border border-white/10 bg-[radial-gradient(circle,rgba(42,186,169,.17),transparent_70%)]" />
+            <div className="relative mx-auto max-w-[720px]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.17em] text-[#94ADFA]">Your next discovery starts here</p>
+              <h2 className="mt-5 text-[clamp(30px,4vw,52px)] font-semibold leading-[1.15] tracking-[-0.055em]">See your data in a whole new way.</h2>
+              <p className="mx-auto mt-5 max-w-[540px] text-[14px] leading-7 text-[#B9C8DF] sm:text-[15px]">Bring your questions. Bring your data. Let CaaS help you find the patterns worth exploring.</p>
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+                <Link href="/register" className="inline-flex min-h-[49px] items-center justify-center gap-2 rounded-lg bg-white px-6 text-[13px] font-bold text-[#1D3665] transition-colors hover:bg-[#E9F0FF]">Create an account <ArrowIcon /></Link>
+                <Link href="/login" className="inline-flex min-h-[49px] items-center justify-center rounded-lg border border-white/25 px-6 text-[13px] font-semibold text-white transition-colors hover:bg-white/10">Sign in</Link>
+              </div>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-[#E7EAF0] bg-white">
-        <div className="mx-auto flex max-w-[1240px] flex-wrap items-center justify-between gap-3 px-5 py-6 sm:px-8">
-          <span className="text-[13px] font-semibold tracking-[-0.03em] text-[#253248]">
-            caas.
-          </span>
-
-          <span className="text-[11px] text-[#98A3B1]">
-            Clustering, with clarity. © 2026 CaaS.
-          </span>
+      <footer className="border-t border-[#E7ECF3] bg-[#FBFCFE]">
+        <div className="mx-auto flex max-w-[1240px] flex-col gap-7 px-5 py-9 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-10">
+          <div className="flex flex-col gap-2">
+            <Link href="/" className="w-fit" aria-label="CaaS home"><BrandMark /></Link>
+            <span className="text-[12px] text-[#8695A8]">Clustering with clarity.</span>
+          </div>
+          <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[12px] font-medium text-[#63758E]">
+            <a href="#why-caas" className="hover:text-[#315FE6]">Why CaaS</a>
+            <a href="#how-it-works" className="hover:text-[#315FE6]">How it works</a>
+            <Link href="/login" className="hover:text-[#315FE6]">Sign in</Link>
+            <Link href="/register" className="hover:text-[#315FE6]">Create account</Link>
+          </nav>
         </div>
+        <div className="border-t border-[#E8EDF4] px-5 py-5 text-center text-[11px] text-[#9AA7B8]">© 2026 CaaS. Built to make data easier to understand.</div>
       </footer>
     </div>
   );
