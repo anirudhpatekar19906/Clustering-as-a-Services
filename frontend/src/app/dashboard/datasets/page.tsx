@@ -621,6 +621,13 @@ async function PrivateDatasets({
                           </p>
                         </div>
                       </details>
+                      <Link
+                        href={`/dashboard/datasets/${item.id}/quality`}
+                        className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold text-[#305BE8] hover:underline"
+                      >
+                        View quality report
+                        <span aria-hidden="true">→</span>
+                      </Link>
                     </td>
 
                     <td className="whitespace-nowrap">

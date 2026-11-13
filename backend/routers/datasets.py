@@ -19,6 +19,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
+from backend.dataset_quality import analyze_sample_quality
 from backend.models import Dataset, User
 from backend.routers.auth import get_current_user
 from configuration.settings import Settings, get_settings
@@ -73,15 +74,52 @@ class ColumnProfile(BaseModel):
     mean: float | None = None
 
 
+class QualityColumnResponse(BaseModel):
+    """Sample-based data quality statistics for one column."""
+
+    name: str
+    inferred_type: Literal["numeric", "text", "mixed", "empty"]
+
+    missing_count: int = Field(ge=0)
+    distinct_count: int = Field(ge=0)
+    invalid_numeric_count: int = Field(ge=0)
+    potential_outlier_count: int = Field(ge=0)
+
+    is_constant: bool
+
+
+class DatasetQualityResponse(BaseModel):
+    """Read-only quality report for a bounded CSV sample."""
+
+    sample_scope: Literal["first_rows"]
+    sample_is_partial: bool
+    sampled_rows: int = Field(ge=0)
+
+    missing_cells: int = Field(ge=0)
+    rows_with_missing: int = Field(ge=0)
+    duplicate_rows: int = Field(ge=0)
+
+    nonnumeric_columns: int = Field(ge=0)
+    mixed_columns: int = Field(ge=0)
+    constant_columns: int = Field(ge=0)
+    potential_outlier_cells: int = Field(ge=0)
+
+    columns: list[QualityColumnResponse]
+    recommendations: list[str]
+
+
 class DatasetPreviewResponse(BaseModel):
-    """Dataset preview and inferred column information."""
+    """Dataset preview, column profiles, and quality analysis."""
 
     dataset_id: UUID
     total_rows: int | None
     sampled_rows: int
     preview_limit: int
+
     rows: list[dict[str, str | None]]
     columns: list[ColumnProfile]
+
+    quality: DatasetQualityResponse
 
 
 # --------------------------------------------------
@@ -139,18 +177,29 @@ def _profile_column(name: str, values: list[str]) -> ColumnProfile:
     )
 
 
+
 def _preview_csv(
     path: Path,
     expected_columns: list[str],
     limit: int,
-) -> tuple[list[dict[str, str | None]], int, list[ColumnProfile]]:
-    """Read a bounded sample and produce preview rows and column statistics."""
+    total_rows: int | None,
+) -> tuple[
+    list[dict[str, str | None]],
+    int,
+    list[ColumnProfile],
+    DatasetQualityResponse,
+]:
+    """Read a bounded CSV sample and calculate quality statistics."""
 
     sampled: list[list[str]] = []
 
-    with path.open("r", encoding="utf-8-sig", newline="") as stream:
-        reader = csv.reader(stream, strict=True)
+    with path.open(
+        "r",
+        encoding="utf-8-sig",
+        newline="",
+    ) as stream:
 
+        reader = csv.reader(stream, strict=True)
         header = next(reader, None)
 
         if header != expected_columns:
@@ -159,6 +208,7 @@ def _preview_csv(
             )
 
         for row in reader:
+
             if not row:
                 continue
 
@@ -172,6 +222,7 @@ def _preview_csv(
             if len(sampled) >= PROFILE_SAMPLE_ROWS:
                 break
 
+    # Existing preview functionality
     preview_rows = [
         {
             name: (
@@ -184,6 +235,7 @@ def _preview_csv(
         for row in sampled[:limit]
     ]
 
+    # Existing column statistics
     columns = [
         _profile_column(
             name,
@@ -192,7 +244,23 @@ def _preview_csv(
         for index, name in enumerate(expected_columns)
     ]
 
-    return preview_rows, len(sampled), columns
+    # New intelligent dataset health analysis
+    quality_data = analyze_sample_quality(
+        sampled,
+        expected_columns,
+        total_rows=total_rows,
+    )
+
+    quality = DatasetQualityResponse.model_validate(
+        quality_data
+    )
+
+    return (
+        preview_rows,
+        len(sampled),
+        columns,
+        quality,
+    )
 
 
 def _safe_dataset_path(root: Path, storage_key: str) -> Path:
@@ -500,10 +568,11 @@ def preview_dataset(
     )
 
     try:
-        preview_rows, sample_count, columns = _preview_csv(
+        preview_rows, sample_count, columns, quality = _preview_csv(
             path,
             record.column_names or [],
             limit,
+            record.row_count,
         )
 
     except FileNotFoundError as exc:
@@ -544,4 +613,5 @@ def preview_dataset(
         preview_limit=limit,
         rows=preview_rows,
         columns=columns,
+        quality=quality,
     )
